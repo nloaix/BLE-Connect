@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.BleDevicesActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:orientation="vertical"
+        android:background="@color/orangeRed"
+        android:id="@+id/ll_all_switch"
+        >
+        <LinearLayout
+            android:id="@+id/ll_bt_switch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingEnd="10dp"
+            android:paddingStart="10dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/open_bt"
+                android:layout_gravity="start|center_vertical"
+                android:gravity="center_vertical"
+                android:textColor="@color/white"
+                />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/btn_open_bt"
+                android:text="@string/enabled"
+                android:layout_gravity="end|center_vertical"
+                android:gravity="center_vertical"
+                android:textColor="@color/white"
+                android:background="@color/orangeRed"
+                android:textSize="18sp"
+                />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ll_location_switch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingEnd="10dp"
+            android:paddingStart="10dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/open_location"
+                android:layout_gravity="start|center_vertical"
+                android:gravity="center_vertical"
+                android:textColor="@color/white"
+                />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/btn_open_location"
+                android:text="@string/enabled"
+                android:layout_gravity="end|center_vertical"
+                android:gravity="center_vertical"
+                android:textColor="@color/white"
+                android:background="@color/orangeRed"
+                android:textSize="18sp"
+                />
+        </LinearLayout>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/scan"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/bt_scan"
+        android:textSize="18sp"
+        app:layout_constraintTop_toBottomOf="@id/ll_all_switch"
+        tools:layout_editor_absoluteX="57dp" />
+
+    <Button
+        android:id="@+id/begin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="88dp"
+        android:text="@string/begin"
+        android:textSize="18sp"
+        app:layout_constraintLeft_toRightOf="@id/scan"
+        app:layout_constraintTop_toBottomOf="@id/ll_all_switch" />
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="400dp"
+        android:id="@+id/lv_bt_devices"
+        app:layout_constraintLeft_toLeftOf="@id/ll_all_switch"
+        app:layout_constraintTop_toBottomOf="@id/scan"
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

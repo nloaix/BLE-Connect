@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="25dp"
+    >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:id="@+id/ll_bt_characteristic_info"
+        android:layout_alignParentStart="true"
+        >
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="10dp"
+            >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv_bt_characteristic_name"
+                android:textSize="18sp"
+                android:text="ONE PLUS 5"
+                android:textStyle="bold"
+                android:textColor="#000000"
+                />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="10dp"
+            >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:text="UUID:  "
+                android:textStyle="bold"
+                android:textColor="#99000000"
+                />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv_bt_characteristic_uuid"
+                android:textSize="14sp"
+                android:textColor="#77000000"
+                android:text="12:23:23:3245:2342;23"
+                />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="5dp"
+            >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textColor="#99000000"
+                android:textStyle="bold"
+                android:text="properties:  "
+                />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv_bt_characteristic_properties"
+                android:textSize="14sp"
+                android:textColor="#77000000"
+                android:text="12:23:23:3245:2342;23"
+                />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="5dp"
+            android:layout_marginBottom="10dp"
+            >
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/btn_read_data"
+                android:textSize="14sp"
+                android:background="@drawable/button_blue_background"
+                android:text="read data"
+                android:textColor="#bb000000"
+                android:paddingTop="7dp"
+                android:paddingBottom="7dp"
+                android:minHeight="0dp"
+                />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:id="@+id/btn_notify"
+                android:text="set notify"
+                android:background="@drawable/button_blue_background"
+                android:textColor="#bb000000"
+                android:paddingTop="7dp"
+                android:paddingBottom="7dp"
+                android:minHeight="0dp"
+                />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/btn_send_data"
+                android:textSize="14sp"
+                android:background="@drawable/button_blue_background"
+                android:text="send data"
+                android:textColor="#bb000000"
+                android:paddingTop="7dp"
+                android:paddingBottom="7dp"
+                android:minHeight="0dp"
+                />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</RelativeLayout>

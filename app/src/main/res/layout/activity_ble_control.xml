@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#ccc"
+    tools:context=".ui.BleControlActivity">
+
+    <RelativeLayout
+        android:background="#cccccccc"
+        android:id="@+id/rl_all_bt_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:padding="10dp"
+        >
+
+        <TextView
+            android:id="@+id/tv_device_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:gravity="center_vertical"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:text="Device Name: " />
+
+        <TextView
+            android:id="@+id/tv_device_mac"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/tv_device_name"
+            android:layout_above="@id/tv_device_data"
+            android:layout_alignParentTop="true"
+            android:gravity="center_vertical"
+            android:textColor="#000"
+            android:paddingLeft="10dp"
+            android:text="123:213:23:23" />
+
+        <TextView
+            android:id="@+id/tv_data_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_device_name"
+            android:layout_marginTop="10dp"
+            android:gravity="center_vertical"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:text="Data: " />
+
+        <TextView
+            android:id="@+id/tv_device_data"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_device_name"
+            android:layout_toEndOf="@id/tv_data_name"
+            android:gravity="center_vertical"
+            android:textSize="16sp"
+            android:paddingTop="4dp"
+            android:paddingLeft="10dp"
+            android:layout_marginTop="10dp"
+            android:text="123:213:23:23wewe" />
+
+    </RelativeLayout>
+
+    <ExpandableListView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/rl_all_bt_info"
+        android:id="@+id/elv_bt_services"
+        />
+
+</LinearLayout>

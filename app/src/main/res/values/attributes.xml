@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string-array name="uuids" tools:ignore="TypographyDashes">
+        <!-- Service UUID -->
+        <item>00001800-0000-1000-8000-00805f9b34fb|Generic Access Service</item>
+        <item>00001801-0000-1000-8000-00805f9b34fb|Generic Attribute Service</item>
+        <item>00001802-0000-1000-8000-00805f9b34fb|Immediate Alert Service</item>
+        <item>00001803-0000-1000-8000-00805f9b34fb|Link Loss Service</item>
+        <item>00001804-0000-1000-8000-00805f9b34fb|TX Power Service</item>
+        <item>00001805-0000-1000-8000-00805f9b34fb|Current Time Service</item>
+        <item>00001806-0000-1000-8000-00805f9b34fb|Reference Time Update Service</item>
+        <item>00001807-0000-1000-8000-00805f9b34fb|Next DST Change Service</item>
+        <item>00001808-0000-1000-8000-00805f9b34fb|Glucose Service</item>
+        <item>00001809-0000-1000-8000-00805f9b34fb|Health Thermometer Service</item>
+        <item>0000180a-0000-1000-8000-00805f9b34fb|Device Information Service</item>
+        <item>0000180b-0000-1000-8000-00805f9b34fb|Network Availability Service</item>
+        <item>0000180d-0000-1000-8000-00805f9b34fb|Heart Rate Service</item>
+        <item>0000180e-0000-1000-8000-00805f9b34fb|Phone Alert Status Service</item>
+        <item>0000180f-0000-1000-8000-00805f9b34fb|Battery Service</item>
+        <item>00001810-0000-1000-8000-00805f9b34fb|Blood Pressure Service</item>
+        <item>00001811-0000-1000-8000-00805f9b34fb|Alert Notification Service</item>
+        <item>00001812-0000-1000-8000-00805f9b34fb|Human Interface Device Service</item>
+        <item>00001813-0000-1000-8000-00805f9b34fb|Scan Parameters Service</item>
+        <item>00001814-0000-1000-8000-00805f9b34fb|Running Speed and Cadence</item>
+        <item>00001815-0000-1000-8000-00805f9b34fb|Automation IO</item>
+        <item>00001816-0000-1000-8000-00805f9b34fb|Cycling Speed and Cadence</item>
+        <item>00001826-0000-1000-8000-00805f9b34fb|Fitness Machine Service</item>
+        <!-- Characteristic UUID -->
+        <item>00002a00-0000-1000-8000-00805f9b34fb|Device Name</item>
+        <item>00002a01-0000-1000-8000-00805f9b34fb|Appearance</item>
+        <item>00002a02-0000-1000-8000-00805f9b34fb|Privacy Flag</item>
+        <item>00002a03-0000-1000-8000-00805f9b34fb|Reconnection Address</item>
+        <item>00002a04-0000-1000-8000-00805f9b34fb|Preferred Connection Parameters</item>
+        <item>00002a05-0000-1000-8000-00805f9b34fb|Service Changed</item>
+        <item>00002a06-0000-1000-8000-00805f9b34fb|Alert Level</item>
+        <item>00002a07-0000-1000-8000-00805f9b34fb|TX Power Level</item>
+        <item>00002a08-0000-1000-8000-00805f9b34fb|Date/Time</item>
+        <item>00002a09-0000-1000-8000-00805f9b34fb|Day of Week</item>
+        <item>00002a0a-0000-1000-8000-00805f9b34fb|Day Date/Time</item>
+        <item>00002a0c-0000-1000-8000-00805f9b34fb|Exact Time 256</item>
+        <item>00002a0d-0000-1000-8000-00805f9b34fb|DST Offset</item>
+        <item>00002a0e-0000-1000-8000-00805f9b34fb|Time Zone</item>
+        <item>00002a0f-0000-1000-8000-00805f9b34fb|Local Time Information</item>
+        <item>00002a10-0000-1000-8000-00805f9b34fb|Secondary Time Zone</item>
+        <item>00002a11-0000-1000-8000-00805f9b34fb|Time with DST</item>
+        <item>00002a12-0000-1000-8000-00805f9b34fb|Time Accuracy</item>
+        <item>00002a13-0000-1000-8000-00805f9b34fb|Time Source</item>
+        <item>00002a14-0000-1000-8000-00805f9b34fb|Reference Time Information</item>
+        <item>00002a15-0000-1000-8000-00805f9b34fb|Time Broadcast</item>
+        <item>00002a16-0000-1000-8000-00805f9b34fb|Time Update Control Point</item>
+        <item>00002a17-0000-1000-8000-00805f9b34fb|Time Update State</item>
+        <item>00002a18-0000-1000-8000-00805f9b34fb|Glucose Measurement</item>
+        <item>00002a19-0000-1000-8000-00805f9b34fb|Battery Level</item>
+        <item>00002a1a-0000-1000-8000-00805f9b34fb|Battery Power State</item>
+        <item>00002a1b-0000-1000-8000-00805f9b34fb|Battery Level State</item>
+        <item>00002a1c-0000-1000-8000-00805f9b34fb|Temperature Measurement</item>
+        <item>00002a1d-0000-1000-8000-00805f9b34fb|Temperature Type</item>
+        <item>00002a1e-0000-1000-8000-00805f9b34fb|Intermediate Temperature</item>
+        <item>00002a1f-0000-1000-8000-00805f9b34fb|Temperature in Celcius</item>
+        <item>00002a20-0000-1000-8000-00805f9b34fb|Temperature in Fahrenheit</item>
+        <item>00002a21-0000-1000-8000-00805f9b34fb|Measurement Interval</item>
+        <item>00002a22-0000-1000-8000-00805f9b34fb|Boot Keyboard Input Report</item>
+        <item>00002a23-0000-1000-8000-00805f9b34fb|System ID</item>
+        <item>00002a24-0000-1000-8000-00805f9b34fb|Model Number String</item>
+        <item>00002a25-0000-1000-8000-00805f9b34fb|Serial Number String</item>
+        <item>00002a26-0000-1000-8000-00805f9b34fb|Firmware Revision String</item>
+        <item>00002a27-0000-1000-8000-00805f9b34fb|Hardware Revision String</item>
+        <item>00002a28-0000-1000-8000-00805f9b34fb|Software Revision String</item>
+        <item>00002a29-0000-1000-8000-00805f9b34fb|Manufacturer Name String</item>
+        <item>00002a2a-0000-1000-8000-00805f9b34fb|IEEE 11073-20601 Regulatory Certification Data List</item>
+        <item>00002a2b-0000-1000-8000-00805f9b34fb|Current Time</item>
+        <item>00002a31-0000-1000-8000-00805f9b34fb|Scan Refresh</item>
+        <item>00002a32-0000-1000-8000-00805f9b34fb|Boot Keyboard Output Report</item>
+        <item>00002a33-0000-1000-8000-00805f9b34fb|Boot Mouse Input Report</item>
+        <item>00002a34-0000-1000-8000-00805f9b34fb|Glucose Measurement Context</item>
+        <item>00002a35-0000-1000-8000-00805f9b34fb|Blood Pressure Measurement</item>
+        <item>00002a36-0000-1000-8000-00805f9b34fb|Intermediate Cuff Pressure</item>
+        <item>00002a37-0000-1000-8000-00805f9b34fb|Heart Rate Measurement</item>
+        <item>00002a38-0000-1000-8000-00805f9b34fb|Body Sensor Location</item>
+        <item>00002a39-0000-1000-8000-00805f9b34fb|Heart Rate Control Point</item>
+        <item>00002a3a-0000-1000-8000-00805f9b34fb|Removable</item>
+        <item>00002a3b-0000-1000-8000-00805f9b34fb|Service Required</item>
+        <item>00002a3c-0000-1000-8000-00805f9b34fb|Scientific Temperature in Celcius</item>
+        <item>00002a3d-0000-1000-8000-00805f9b34fb|String</item>
+        <item>00002a3e-0000-1000-8000-00805f9b34fb|Network Availability</item>
+        <item>00002a3f-0000-1000-8000-00805f9b34fb|Alert Status</item>
+        <item>00002a40-0000-1000-8000-00805f9b34fb|Ringer Control Point</item>
+        <item>00002a41-0000-1000-8000-00805f9b34fb|Ringer Setting</item>
+        <item>00002a42-0000-1000-8000-00805f9b34fb|Alert Category ID Bit Mask</item>
+        <item>00002a43-0000-1000-8000-00805f9b34fb|Alert Category ID</item>
+        <item>00002a44-0000-1000-8000-00805f9b34fb|Alert Notification Control Point</item>
+        <item>00002a45-0000-1000-8000-00805f9b34fb|Unread Alert Status</item>
+        <item>00002a46-0000-1000-8000-00805f9b34fb|New Alert</item>
+        <item>00002a47-0000-1000-8000-00805f9b34fb|Supported New Alert Category</item>
+        <item>00002a48-0000-1000-8000-00805f9b34fb|Supported Unread Alert Category</item>
+        <item>00002a49-0000-1000-8000-00805f9b34fb|Blood Pressure Feature</item>
+        <item>00002a4a-0000-1000-8000-00805f9b34fb|HID Information</item>
+        <item>00002a4b-0000-1000-8000-00805f9b34fb|Report Map</item>
+        <item>00002a4c-0000-1000-8000-00805f9b34fb|HID Control Point</item>
+        <item>00002a4d-0000-1000-8000-00805f9b34fb|Report</item>
+        <item>00002a4e-0000-1000-8000-00805f9b34fb|Protocol Mode</item>
+        <item>00002a4f-0000-1000-8000-00805f9b34fb|Scan Interval Window</item>
+        <item>00002a50-0000-1000-8000-00805f9b34fb|PnP ID</item>
+        <item>00002a51-0000-1000-8000-00805f9b34fb|Glucose Feature</item>
+        <item>00002a52-0000-1000-8000-00805f9b34fb|Record Access Control Point</item>
+        <item>00002a53-0000-1000-8000-00805f9b34fb|RSC Measurement</item>
+        <item>00002a54-0000-1000-8000-00805f9b34fb|RSC Feature</item>
+        <item>00002a55-0000-1000-8000-00805f9b34fb|SC Control Point</item>
+        <item>00002a56-0000-1000-8000-00805f9b34fb|Digital Input</item>
+        <item>00002a57-0000-1000-8000-00805f9b34fb|Digital Output</item>
+        <item>00002a58-0000-1000-8000-00805f9b34fb|Analog Input</item>
+        <item>00002a59-0000-1000-8000-00805f9b34fb|Analog Output</item>
+        <item>00002a5a-0000-1000-8000-00805f9b34fb|Aggregate Input</item>
+        <item>00002a5b-0000-1000-8000-00805f9b34fb|CSC Measurement</item>
+        <item>00002a5c-0000-1000-8000-00805f9b34fb|CSC Feature</item>
+        <item>00002a5d-0000-1000-8000-00805f9b34fb|Sensor Location</item>
+        <item>00002a5e-0000-1000-8000-00805f9b34fb|Pulse Oximetry Spot-Check Measurement</item>
+        <item>00002a60-0000-1000-8000-00805f9b34fb|Pulse Oximetry Pulsatile Event</item>
+        <item>00002a61-0000-1000-8000-00805f9b34fb|Pulse Oximetry Features</item>
+        <item>00002a62-0000-1000-8000-00805f9b34fb|Pulse Oximetry Control Point</item>
+        <item>00002acc-0000-1000-8000-00805F9B34FB|FITNESS MACHINE FEATURE</item>
+        <item>00002acd-0000-1000-8000-00805f9b34fb|Treadmill Data</item>
+        <item>00002ace-0000-1000-8000-00805F9B34FB|Cross Trainer Data</item>
+        <item>00002acf-0000-1000-8000-00805F9B34FB|Step Climber Data</item>
+        <item>00002ad0-0000-1000-8000-00805F9B34FB|Stair Climber Data</item>
+        <item>00002ad1-0000-1000-8000-00805F9B34FB|Rower Data</item>
+        <item>00002ad2-0000-1000-8000-00805F9B34FB|INDOOR BIKE DATA</item>
+        <item>00002ad3-0000-1000-8000-00805F9B34FB|Training Status</item>
+        <item>00002ad4-0000-1000-8000-00805F9B34FB|Supported Speed Range</item>
+        <item>00002ad5-0000-1000-8000-00805F9B34FB|Supported Inclination RANGE</item>
+        <item>00002ad6-0000-1000-8000-00805F9B34FB|Supported RESISTANCE LEVEL RANGE</item>
+        <item>00002ad7-0000-1000-8000-00805F9B34FB|Supported Heart Rate Range</item>
+        <item>00002ad8-0000-1000-8000-00805F9B34FB|Supported Power Range</item>
+        <item>00002ad9-0000-1000-8000-00805F9B34FB|FITNESS MACHINE CONTROL POINT</item>
+        <item>00002ada-0000-1000-8000-00805F9B34FB|FITNESS MACHINE STATUS</item>
+        <!-- Descriptor UUID -->
+        <item>00002902-0000-1000-8000-00805f9b34fb|CLIENT CHARACTERISTIC CONFIG</item>
+    </string-array>
+</resources>
