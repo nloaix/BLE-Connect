@@ -61,11 +61,13 @@ public class BleControlActivity extends AppCompatActivity {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             bleService = ((BLEService.BleBinder) service).getBleService();
+            Log.d(TAG,"onServiceConnected");
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
             bleService = null;
+            Log.d(TAG,"onServiceDisConnected");
         }
     };
 
@@ -80,10 +82,14 @@ public class BleControlActivity extends AppCompatActivity {
                 btDeviceDisconnect();
             } else if (BLEService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
                 displayGattServices(bleService.getCurrentGattServices());
+                byte[] value = {
+//                        (byte) 0xFE, 0x05, 0x04, 0x01, 0x01, 0x01, 0x0A,0x14
+                        (byte) 0xFE, 0x13, 0x01, 0x03, 0x15
+                };
+                bleService.writeRXCharacteristic(value);
             } else if (BLEService.ACTION_DATA_AVAILABLE.equals(action)) {
                 if("flag".equals(intent.getStringExtra("FitnessMachineFeature"))){
                     displayFitnessMachineFeatureData(Html.fromHtml(intent.getStringExtra(BLEService.EXTRA_DATA)));
-
                 }else {
                     displayData(Html.fromHtml(intent.getStringExtra(BLEService.EXTRA_DATA)));
                 }
@@ -110,7 +116,6 @@ public class BleControlActivity extends AppCompatActivity {
 
     private void displayData(Spanned stringExtra) {
         mTvDeviceData.setText(stringExtra);
-
     }
     private void displayFitnessMachineFeatureData(Spanned stringExtra){
         View inflate = LayoutInflater.from(this).inflate(R.layout.dialog_item_show_fmf_data, null);
@@ -129,6 +134,7 @@ public class BleControlActivity extends AppCompatActivity {
 
     private void btDeviceDisconnect() {
         //clear all ui data
+        Log.d(TAG,"bt is disconnect");
         Toast.makeText(App.getAppContext(),"Bluetooth is disconnect!!",Toast.LENGTH_SHORT).show();
         Intent intent = new Intent();
         intent.setAction(ACTION_REFRESH);
@@ -209,19 +215,22 @@ public class BleControlActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         registerReceiver(mGattUpdateReceiver,getFilters());
+        Log.d(TAG,"bt is resume");
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         unregisterReceiver(mGattUpdateReceiver);
+        Log.d(TAG,"bt is pause");
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        Log.d(TAG,"bt is onDestroy");
         unbindService(serviceConnection);
-        bleService.disconnect();
+        bleService.disconnect();  // 注销此行 表示GATT服务没有断开 重新搜索失败 重新开关机设备后才可以搜到
         bleService = null;
     }
 

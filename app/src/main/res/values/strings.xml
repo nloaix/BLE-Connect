@@ -20,5 +20,7 @@
 
     <string name="tv_bt_rssi">-00dBm</string>
     <string name="begin">开始</string>
+    <string name="tv_rssi">RSSI值</string>
+    <string name="tv_rssi_data">-50dBm</string>
 
 </resources>

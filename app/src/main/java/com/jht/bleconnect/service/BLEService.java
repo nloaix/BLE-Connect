@@ -60,15 +60,10 @@ public class BLEService extends Service {
 
     public final static String EXTRA_DATA = "com.jht.ble.EXTRA_DATA";
 
-//    public static final UUID RX_SERVICE_UUID = UUID.fromString ("00003dd0-65d0-4e20-b56a-e493541ba4e2");
-//    public static final UUID RX_CHAR_UUID = UUID.fromString ("00003dd1-65d0-4e20-b56a-e493541ba4e2");
-//    public static final UUID TX_CHAR_UUID = UUID.fromString ("00003dd2-65d0-4e20-b56a-e493541ba4e2");
-
+    // uNeck-310 和 G2一样的
     public static final UUID RX_SERVICE_UUID = UUID.fromString ("49535343-fe7d-4ae5-8fa9-9fafd205e455");
-//    public static final UUID RX_CHAR_UUID = UUID.fromString ("49535343-1e4d-4bd9-ba61-23c647249616");
     public static final UUID RX_CHAR_UUID = UUID.fromString ("49535343-8841-43f4-a8d4-ecbe34729bb3");
     public static final UUID TX_CHAR_UUID = UUID.fromString ("49535343-1e4d-4bd9-ba61-23c647249616");
-//    public static final UUID TX_CHAR_UUID = UUID.fromString ("49535343-8841-43f4-a8d4-ecbe34729bb3");
 
     //G36
 //    public static final UUID RX_SERVICE_UUID = UUID.fromString ("0000fff0-0000-1000-8000-00805f9b34fb");
@@ -94,7 +89,6 @@ public class BLEService extends Service {
     public boolean writeRXCharacteristic (byte[] value) {
         BluetoothGattService RxService = mCurrentBluetoothGatt.getService (RX_SERVICE_UUID);
         showMessage ("mBluetoothGatt null" + mCurrentGattServices);
-        Log.d(TAG,"RXSERVICE"+RxService);
         if (RxService == null)
         {
             showMessage ("Rx service not found!");
@@ -122,7 +116,8 @@ public class BLEService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         currentDevice = (BluetoothDevice) intent.getParcelableExtra("device");
-        mCurrentBluetoothGatt = currentDevice.connectGatt(this, true, mGattCallback);
+        Log.d(TAG,"当前的devie====="+currentDevice);
+        mCurrentBluetoothGatt = currentDevice.connectGatt(this, false, mGattCallback);
         Log.i(TAG, "onBind: mCurrentBluetoothGatt ==> " + mCurrentBluetoothGatt);
         return new BleBinder();
     }
@@ -137,7 +132,6 @@ public class BLEService extends Service {
                 broadcastUpdate(intentAction);
                 Log.i(TAG, "Connected to GATT server.");
                 Log.i(TAG, "Attempting to start service discovery:" + mCurrentBluetoothGatt.discoverServices());
-
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 intentAction = ACTION_GATT_DISCONNECTED;
                 mConnectionState = STATE_DISCONNECTED;
@@ -149,6 +143,7 @@ public class BLEService extends Service {
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
+                Log.d(TAG,"当前status== GATT_SUCCESS");
                 broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED);
             } else {
                 Log.w(TAG, "onServicesDiscovered received: " + status);
@@ -226,7 +221,7 @@ public class BLEService extends Service {
         @Override
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                //broadcastUpdate(ACTION_WRITE_RESPONSE, characteristic);
+                broadcastUpdate(ACTION_WRITE_RESPONSE, characteristic);
             }
         }
 
@@ -247,8 +242,6 @@ public class BLEService extends Service {
                                  final BluetoothGattCharacteristic characteristic) {
         final Intent intent = new Intent(action);
         UUID characteristicUUID = attributeLookup.getCharacteristicUUID(attributeLookup.getCharacteristic(characteristic.getUuid()));
-        Log.d(TAG,"UUID======="+characteristicUUID);
-        Log.d(TAG,"UUID======="+characteristic.getUuid());
         if (UUID_HEART_RATE_MEASUREMENT.equals(characteristic.getUuid())) {
             int flag = characteristic.getProperties();
             int format = -1;
@@ -523,6 +516,7 @@ public class BLEService extends Service {
     }
 
     public void disconnect() {
+        Log.d(TAG,"GATT IS DISCONNECT");
         mCurrentBluetoothGatt.disconnect();
         mCurrentGattServices = null;
         mCurrentServiceAndCharacteristic = null;
@@ -606,12 +600,6 @@ public class BLEService extends Service {
                     Log.i("cccc", "setSpeed: " + mCurrentBluetoothGatt.writeCharacteristic(currentWriteCharacteristicFromStrUUID));
                     return;
                 }
-
-
-
-
-                //
-
 
                 mCurrentParams = "";
                 String name= strParameter;

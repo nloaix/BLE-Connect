@@ -161,6 +161,8 @@ public class ExpandableLvBTAdapter extends BaseExpandableListAdapter {
         childViewHolder.mBtnReadData.setVisibility(View.GONE);
         childViewHolder.mBtnNotify.setVisibility(View.GONE);
         childViewHolder.mBtnSendData.setVisibility(View.GONE);
+
+        Log.d(TAG,"propertiesStr==="+propertiesStr);
         if (propertiesStr.contains("READ")) {
             childViewHolder.mBtnReadData.setVisibility(View.VISIBLE);
             childViewHolder.mBtnReadData.setOnClickListener(new View.OnClickListener() {

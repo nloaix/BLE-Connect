@@ -1,5 +1,6 @@
 package com.jht.bleconnect.ui;
 
+import androidx.annotation.LongDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
@@ -11,6 +12,7 @@ import androidx.core.app.ActivityCompat;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
+import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.BluetoothLeScanner;
@@ -35,6 +37,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -47,12 +50,8 @@ import com.jht.bleconnect.common.DialogUtil;
 import com.jht.bleconnect.service.BLEService;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import android.content.ContextWrapper;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class BleDevicesActivity extends AppCompatActivity {
     private String TAG = getClass().getSimpleName();
@@ -64,10 +63,16 @@ public class BleDevicesActivity extends AppCompatActivity {
     private Button mBtnOpenLocation;
     private Button mScan;
     private ListView mLvBtDevices;
-    private Button begin;
-    private BluetoothGatt bluetoothGatt;
-    private BLEService bleService;
+    private Button begin;   // 开始按钮
     private boolean mConnected;
+    private String deviceName;
+    private boolean mDisconnect = true;
+    private Timer timer;
+    private int rssi_data = 50;  // 默认RSSI值
+    private int i;
+    private SeekBar seekBar;     // 滑动条
+    private TextView tv_rssi_data;  // rssi值的显示
+
 
     //ui code
     private static final int REQUEST_ENABLE_BT = 100;
@@ -93,11 +98,13 @@ public class BleDevicesActivity extends AppCompatActivity {
     private BluetoothAdapter bluetoothAdapter = null;
     private BtAndGpsReceiver btAndGpsReceiver = null;
     private BTDeviceLVAdapter btDeviceLVAdapter;
+    private BluetoothGatt bluetoothGatt;
+    private BLEService bleService;
 
     private BluetoothAdapter.LeScanCallback leScanCallback = new BluetoothAdapter.LeScanCallback() {
         @Override
         public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
-            if (device.getName() == null || device.getName().equals("") || rssi < -50){
+            if (device.getName() == null || device.getName().equals("") || rssi < -rssi_data){
             } else {
                 btDeviceLVAdapter.addDevice(device,rssi);
             }
@@ -132,9 +139,35 @@ public class BleDevicesActivity extends AppCompatActivity {
         initView();
         btAndGpsReceiver = new BtAndGpsReceiver();
         registerReceiver(btAndGpsReceiver, getFilters());
-
         hasPermission = AppPermission.requestAppPermissions(this, REQUEST_PERMISSIONS);
+        bindView();
+    }
 
+    // 滑动条设置
+    private void bindView() {
+        seekBar = (SeekBar) findViewById(R.id.seekBar);
+        tv_rssi_data = (TextView) findViewById(R.id.tv_rssi_data);
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                tv_rssi_data.setText("-" + progress + "dBm");
+                rssi_data = progress;
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                // 按住seekbar时触发
+                mScanning = false;
+                mScan.setText("SCAN");
+                uiHandler.removeCallbacks(stopScan);
+                bluetoothAdapter.stopLeScan(leScanCallback);
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                // 松开seekbar时触发
+            }
+        });
     }
 
     private void initView() {
@@ -200,50 +233,69 @@ public class BleDevicesActivity extends AppCompatActivity {
                 uiHandler.removeCallbacks(stopScan);
                 bluetoothAdapter.stopLeScan(leScanCallback);
                 BluetoothDevice device = (BluetoothDevice) btDeviceLVAdapter.getItem(position);
+                Log.d(TAG,"原来点击后的device==="+device);
                 Intent intent = new Intent(BleDevicesActivity.this, BleControlActivity.class);
                 intent.putExtra("device", device);
                 startActivity(intent);
+//                Intent intent = new Intent(getApplicationContext(),BLEService.class);
+//                intent.putExtra("device",device);
+//                bindService(intent,serviceConnection,BIND_AUTO_CREATE);
+//                registerReceiver(mGattServiceContent,getFilters());
             }
         });
+
+
+        final TimerTask task = new TimerTask() {
+            @Override
+            public void run() {
+                Message message = new Message();
+                message.what = 1;
+                handler.sendMessage(message);
+            }
+        };
 
         // 循环btDeviceLVAdapter中的LIST
         begin = (Button) findViewById(R.id.begin);
         begin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                timer = new Timer();
+                timer.schedule(task,0,3000);
                 Log.d(TAG,"mLvBtDevices的长度是="+mLvBtDevices.getCount());
-                fordevice(mLvBtDevices);
             }
         });
     }
 
-    public void fordevice (ListView listView){
-        for (int i = 0; i < listView.getCount(); i++) {
+
+    private Handler handler = new Handler() {
+        public void handleMessage (Message msg) {
+            Log.d(TAG,"此时的i=="+i);
             BluetoothDevice device = (BluetoothDevice) btDeviceLVAdapter.getItem(i);
-            Log.d(TAG,"当前的设备是==="+device.getName());
-            Intent bleServiceIntent = new Intent(this, BLEService.class);
-            bleServiceIntent.putExtra("device",device);
-            bindService(bleServiceIntent,serviceConnection,BIND_AUTO_CREATE);
+            Log.d(TAG,"此时的device===="+device);
+            Intent intent = new Intent(getApplicationContext(),BLEService.class);
+            intent.putExtra("device",device);
+            bindService(intent,serviceConnection,BIND_AUTO_CREATE);
             registerReceiver(mGattServiceContent,getFilters());
+            i += 1;
+            if (i == btDeviceLVAdapter.getCount()) {
+                timer.cancel();
+                Log.d(TAG,"定时器已取消");
+            }
+            super.handleMessage(msg);
         }
-    }
+    };
 
-
-    private void btDeviceDisconnect() {
-        //clear all ui data
-        Toast.makeText(App.getAppContext(),"Bluetooth is disconnect!!",Toast.LENGTH_SHORT).show();
-    }
-
-
-    // GATT service connetent
+    // GATT service connect
     private ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             bleService = ((BLEService.BleBinder) service).getBleService();
+            Log.d(TAG,"onServiceConnected");
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
+            Log.d(TAG,"onServiceDisConnected");
             bleService = null;
         }
     };
@@ -252,23 +304,18 @@ public class BleDevicesActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            Log.d(TAG,"action=="+action);
+            Log.d(TAG,"action==" + action);
             if (BLEService.ACTION_GATT_CONNECTED.equals(action)) {
                 Log.d(TAG,"ACTION_GATT_CONNECTED");
-                mConnected = true;
             } else if (BLEService.ACTION_GATT_DISCONNECTED.equals(action)) {
                 Log.d(TAG,"ACTION_GATT_DISCONNECTED");
-                mConnected = false;
-//                btDeviceDisconnect();
             } else if (BLEService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
-                Log.d(TAG,"ACTION_GATT_SERVICES_DISCOVERD");
+                Log.d(TAG,"ACTION_GATT_SERVICES_DISCOVERED");
                 byte[] value = {
-//                        (byte) 0xFE, 0x05, 0x04, 0x01, 0x01, 0x01, 0x0A,0x14
                         (byte) 0xFE, 0x13, 0x01, 0x03, 0x15
                 };
                 bleService.writeRXCharacteristic(value);
-                bleService.disconnect();
-//                displayGattServices(bleService.getCurrentGattServices());
+                unbindService(serviceConnection);
             } else if (BLEService.ACTION_DATA_AVAILABLE.equals(action)) {
                 Log.d(TAG,"ACTION_DATA_AVAILABLE");
             }
