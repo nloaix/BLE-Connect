@@ -1,30 +1,27 @@
 package com.jht.bleconnect.adapter;
 
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothGattCallback;
 import android.content.Context;
+import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.TextView;
 
 
 import com.jht.bleconnect.R;
-import com.jht.bleconnect.ui.BleDevicesActivity;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.regex.*;
 
 public class BTDeviceLVAdapter extends BaseAdapter {
     private String TAG = getClass().getSimpleName();
     private List<BluetoothDevice> deviceList = new ArrayList<>();
     private Context context;
     private ArrayList<Integer> mRSSIs = new ArrayList<Integer>();
+    private int selectedId;
 
     public BTDeviceLVAdapter(Context context ){
         this.context = context;
@@ -45,6 +42,10 @@ public class BTDeviceLVAdapter extends BaseAdapter {
         return position;
     }
 
+    public void setSelectedId (int position) {
+        selectedId = position;
+        notifyDataSetInvalidated();
+    }
 
 
     @Override
@@ -62,6 +63,11 @@ public class BTDeviceLVAdapter extends BaseAdapter {
             viewHolder.mTvBtRssi = inflate.findViewById(R.id.tv_bt_rssi);
             inflate.setTag(viewHolder);
         }
+
+        if (position == selectedId) {
+            inflate.setBackgroundColor(Color.GREEN);
+        }
+
         final BluetoothDevice bluetoothDevice = deviceList.get(position);
         int rssi = mRSSIs.get(position);
         String rssiString = (rssi == 0) ? "N/A" : "RSSI:"+rssi+"dBm";

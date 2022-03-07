@@ -5,6 +5,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
@@ -14,6 +15,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -28,12 +30,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.jht.bleconnect.App;
 import com.jht.bleconnect.R;
+import com.jht.bleconnect.adapter.BTDeviceLVAdapter;
 import com.jht.bleconnect.adapter.ExpandableLvBTAdapter;
 import com.jht.bleconnect.entity.FitnessMachineFeature;
 import com.jht.bleconnect.service.BLEService;
@@ -55,8 +59,29 @@ public class BleControlActivity extends AppCompatActivity {
     private BluetoothDevice device;
     private BLEService bleService;
     private ExpandableLvBTAdapter expandableLvBTAdapter;
-    private boolean mConnected = false;
     private ControlActivityUIHandler uiHandler;
+    private BTDeviceLVAdapter btDeviceLVAdapter;
+
+    private boolean isWrite;
+    private boolean isReport;
+    private boolean isPass;
+
+
+    // 16进制转换
+    public static String bytes2HexString(byte[] array) {
+        StringBuilder builder = new StringBuilder();
+        for (byte b : array) {
+            String hex = Integer.toHexString(b & 0xFF);
+
+            if (hex.length() == 1) {
+                hex = '0' + hex;
+            }
+            builder.append(hex);
+        }
+
+        return builder.toString().toUpperCase();
+    }
+
     private ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -72,26 +97,33 @@ public class BleControlActivity extends AppCompatActivity {
     };
 
     private final BroadcastReceiver mGattUpdateReceiver = new BroadcastReceiver() {
+        @SuppressLint("ResourceAsColor")
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
             if (BLEService.ACTION_GATT_CONNECTED.equals(action)) {
-                mConnected = true;
+                Log.d(TAG,"NOW IS CONNECTED");
             } else if (BLEService.ACTION_GATT_DISCONNECTED.equals(action)) {
-                mConnected = false;
-                btDeviceDisconnect();
+                Log.d(TAG,"NOW IS DISCONNECTED");
             } else if (BLEService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
                 displayGattServices(bleService.getCurrentGattServices());
                 byte[] value = {
 //                        (byte) 0xFE, 0x05, 0x04, 0x01, 0x01, 0x01, 0x0A,0x14
-                        (byte) 0xFE, 0x13, 0x01, 0x03, 0x15
+//                        (byte) 0xFE, 0x13, 0x01, 0x03, 0x15
+//                        吮吸器震动3挡
+                        (byte) 0xFE,0x11,0x01,0x23,0x33
                 };
                 bleService.writeRXCharacteristic(value);
+                bleService.enableTXNotification();
             } else if (BLEService.ACTION_DATA_AVAILABLE.equals(action)) {
                 if("flag".equals(intent.getStringExtra("FitnessMachineFeature"))){
-                    displayFitnessMachineFeatureData(Html.fromHtml(intent.getStringExtra(BLEService.EXTRA_DATA)));
+                    Log.d(TAG,"is ACTION_DATA_AVAILABLE");
+//                    displayFitnessMachineFeatureData(Html.fromHtml(intent.getStringExtra(BLervice.EXTRA_DATA)));
                 }else {
-                    displayData(Html.fromHtml(intent.getStringExtra(BLEService.EXTRA_DATA)));
+                    final byte[] rxValue = intent.getByteArrayExtra (BLEService.EXTRA_DATA);
+                    Log.d(TAG,"此处的rxvalue======" + bytes2HexString(rxValue));
+                    isReport = true;
+//                    displayData(Html.fromHtml(intent.getStringExtra(BLEService.EXTRA_DATA)));
                 }
             }
         }
@@ -117,6 +149,7 @@ public class BleControlActivity extends AppCompatActivity {
     private void displayData(Spanned stringExtra) {
         mTvDeviceData.setText(stringExtra);
     }
+
     private void displayFitnessMachineFeatureData(Spanned stringExtra){
         View inflate = LayoutInflater.from(this).inflate(R.layout.dialog_item_show_fmf_data, null);
         TextView tv_fmf_data = inflate.findViewById(R.id.tv_fmf_data);
@@ -130,16 +163,6 @@ public class BleControlActivity extends AppCompatActivity {
             }
         });
         alertDialog.show();
-    }
-
-    private void btDeviceDisconnect() {
-        //clear all ui data
-        Log.d(TAG,"bt is disconnect");
-        Toast.makeText(App.getAppContext(),"Bluetooth is disconnect!!",Toast.LENGTH_SHORT).show();
-        Intent intent = new Intent();
-        intent.setAction(ACTION_REFRESH);
-        sendBroadcast(intent);
-        finish();
     }
 
     @Override
@@ -231,7 +254,6 @@ public class BleControlActivity extends AppCompatActivity {
         Log.d(TAG,"bt is onDestroy");
         unbindService(serviceConnection);
         bleService.disconnect();  // 注销此行 表示GATT服务没有断开 重新搜索失败 重新开关机设备后才可以搜到
-        bleService = null;
     }
 
     private static IntentFilter getFilters() {
@@ -299,6 +321,4 @@ public class BleControlActivity extends AppCompatActivity {
     private void readCharacteristic(String characteristic_uuid) {
         bleService.readCharacteristic(characteristic_uuid);
     }
-
-
 }

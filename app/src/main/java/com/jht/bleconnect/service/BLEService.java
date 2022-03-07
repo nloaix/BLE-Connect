@@ -60,10 +60,18 @@ public class BLEService extends Service {
 
     public final static String EXTRA_DATA = "com.jht.ble.EXTRA_DATA";
 
+    public static final UUID CCCD = UUID.fromString ("00002902-0000-1000-8000-00805f9b34fb");
+
     // uNeck-310 和 G2一样的
-    public static final UUID RX_SERVICE_UUID = UUID.fromString ("49535343-fe7d-4ae5-8fa9-9fafd205e455");
-    public static final UUID RX_CHAR_UUID = UUID.fromString ("49535343-8841-43f4-a8d4-ecbe34729bb3");
-    public static final UUID TX_CHAR_UUID = UUID.fromString ("49535343-1e4d-4bd9-ba61-23c647249616");
+//    public static final UUID RX_SERVICE_UUID = UUID.fromString ("49535343-fe7d-4ae5-8fa9-9fafd205e455");
+//    public static final UUID RX_CHAR_UUID = UUID.fromString ("49535343-8841-43f4-a8d4-ecbe34729bb3");
+//    public static final UUID TX_CHAR_UUID = UUID.fromString ("49535343-1e4d-4bd9-ba61-23c647249616");
+
+    // 思路：定义三个变量，每次连接的时候去
+//    吮吸器
+    public static final UUID RX_SERVICE_UUID = UUID.fromString ("0000fff0-0000-1000-8000-00805f9b34fb");
+    public static final UUID TX_CHAR_UUID = UUID.fromString ("0783b03e-8535-b5a0-7140-a304d2495cb8");
+    public static final UUID RX_CHAR_UUID = UUID.fromString ("0783b03e-8535-b5a0-7140-a304d2495cba");
 
     //G36
 //    public static final UUID RX_SERVICE_UUID = UUID.fromString ("0000fff0-0000-1000-8000-00805f9b34fb");
@@ -87,6 +95,7 @@ public class BLEService extends Service {
 
 
     public boolean writeRXCharacteristic (byte[] value) {
+        Log.d(TAG,"WRITE START");
         BluetoothGattService RxService = mCurrentBluetoothGatt.getService (RX_SERVICE_UUID);
         showMessage ("mBluetoothGatt null" + mCurrentGattServices);
         if (RxService == null)
@@ -105,6 +114,7 @@ public class BLEService extends Service {
         RxChar.setValue (value);
         boolean status = mCurrentBluetoothGatt.writeCharacteristic (RxChar);
         Log.d(TAG,"STATUS"+status);
+        Log.d(TAG,"WRITE END");
         return status;
     }
 
@@ -241,246 +251,252 @@ public class BLEService extends Service {
     private void broadcastUpdate(final String action,
                                  final BluetoothGattCharacteristic characteristic) {
         final Intent intent = new Intent(action);
-        UUID characteristicUUID = attributeLookup.getCharacteristicUUID(attributeLookup.getCharacteristic(characteristic.getUuid()));
-        if (UUID_HEART_RATE_MEASUREMENT.equals(characteristic.getUuid())) {
-            int flag = characteristic.getProperties();
-            int format = -1;
-            if ((flag & 0x01) != 0) {
-                format = BluetoothGattCharacteristic.FORMAT_UINT16;
-                Log.d(TAG, "Heart rate format UINT16.");
-            } else {
-                format = BluetoothGattCharacteristic.FORMAT_UINT8;
-                Log.d(TAG, "Heart rate format UINT8.");
-            }
-            final int heartRate = characteristic.getIntValue(format, 1);
-            Log.d(TAG, String.format("Received heart rate: %d", heartRate));
-            intent.putExtra(EXTRA_DATA, String.valueOf(heartRate));
-            sendBroadcast(intent);
-            return;
-        }
-        if(UUID.fromString("00002a26-0000-1000-8000-00805F9B34FB").equals(characteristic.getUuid()) || UUID.fromString("00002a27-0000-1000-8000-00805F9B34FB").equals(characteristic.getUuid()) || UUID.fromString("00002a28-0000-1000-8000-00805F9B34FB").equals(characteristic.getUuid())){
-            Log.i(TAG, "broadcastUpdate: revision");
-            byte[] value = characteristic.getValue();
-            intent.putExtra(EXTRA_DATA, new String(value, StandardCharsets.UTF_8));
-            sendBroadcast(intent);
-            return;
-        }
-        if (characteristicUUID == null) {
-            intent.putExtra(EXTRA_DATA, "current characteristic can't be parsed data");
-            sendBroadcast(intent);
-            return;
-        }
-        // so characteristicUUID != null
-        if (characteristicUUID.equals(UUID.fromString("00002ad2-0000-1000-8000-00805F9B34FB"))) {
-            //INDOOR_BIKE_DATA
-            IndoorBikeData indoorBikeData = IndoorBikeData.getInstance();
-            indoorBikeData.parseData(characteristic.getValue());
-            intent.putExtra(EXTRA_DATA, "instant speed is <font color='red'>" + indoorBikeData.getInstantaneousSpeed()
-                    + "</font> km/h ;<br/> average speed is <font color='red'>" + indoorBikeData.getAverageSpeed()
-                    + "</font> km/h ;<br/> Instantaneous Cadence is <font color='red'>" + indoorBikeData.getInstantaneousCadence()
-                    + "</font> rpm ;<br/> average cadence is <font color='red'>" + indoorBikeData.getAverageCadence()
-                    + "</font> rpm ;<br/> Total Energy is <font color='red'>" + indoorBikeData.getTotalEnergy()
-                    + "</font> Calorie ;<br/> Energy Per Hour is <font color='red'>" + indoorBikeData.getEnergyPerHour()
-                    + "</font> Calorie ;<br/> Energy Per Minute is <font color='red'>" + indoorBikeData.getEnergyPerMinute()
-                    + "</font> Calorie ;<br/> Heart Rate is <font color='red'>" + indoorBikeData.getHeartRate()
-                    + "</font> BPM ;<br/> Metabolic Equivalent is <font color='red'>" + indoorBikeData.getMetabolicEquivalent()
-                    + "</font> metabolic_equivalent ;<br/> RemainingTime is <font color='red'>" + indoorBikeData.getRemainingTime()
-                    + "</font> second ;<br/> total distance is <font color='red'>" + indoorBikeData.getTotalDistance()
-                    + "</font> metre ;<br/> resistance level is <font color='red'>" + indoorBikeData.getResistanceLevel()
-                    + "</font>;<br/> instant power is <font color='red'>" + indoorBikeData.getInstantaneousPower()
-                    + "</font> watt ;<br/> average power is <font color='red'>" + indoorBikeData.getAveragePower()
-                    + "</font> watt ;<br/> elapsed time is <font color='red'>" + indoorBikeData.getElapedTime() + "</font> second ;<br/>");
-            sendBroadcast(intent);
-            return;
-        }
-        if (characteristicUUID.equals(UUID.fromString("00002acc-0000-1000-8000-00805F9B34FB"))) {
-            //Fitness Machine feature
-            Log.i(TAG, "broadcastUpdate: 2acc");
-            FitnessMachineFeature fitnessMachineFeature = FitnessMachineFeature.getInstance();
-            fitnessMachineFeature.parseData(characteristic.getValue());
-            intent.putExtra("FitnessMachineFeature","flag");
-            intent.putExtra(EXTRA_DATA, "Fitness Machine Features Field : "
-                    + "<br/>         is Average Speed Supported <font color='red'>" + fitnessMachineFeature.isAverageSpeedSupported()
-                    + "</font>;<br/> is Cadence Supported <font color='red'>" + fitnessMachineFeature.isCadenceSupported()
-                    + "</font>;<br/> is Total Distance Supported <font color='red'>" + fitnessMachineFeature.isTotalDistanceSupported()
-                    + "</font>;<br/> is Inclination Supported <font color='red'>" + fitnessMachineFeature.isInclinationSupported()
-                    + "</font>;<br/> is Elevation Gain Supported <font color='red'>" + fitnessMachineFeature.isElevationGainSupported()
-                    + "</font>;<br/> is Pace Supported <font color='red'>" + fitnessMachineFeature.isPaceSupported()
-                    + "</font>;<br/> is Step Count Supported <font color='red'>" + fitnessMachineFeature.isStepCountSupported()
-                    + "</font>;<br/> is Resistance Level Supported <font color='red'>" + fitnessMachineFeature.isResistanceLevelSupported()
-                    + "</font>;<br/> is Stride Count Supported <font color='red'>" + fitnessMachineFeature.isStrideCountSupported()
-                    + "</font>;<br/> is Expended Energy Supported <font color='red'>" + fitnessMachineFeature.isExpendedEnergySupported()
-                    + "</font>;<br/> is HeartRate Measurement Supported <font color='red'>" + fitnessMachineFeature.isHeartRateMeasurementSupported()
-                    + "</font>;<br/> is Metabolic Equivalent Supported <font color='red'>" + fitnessMachineFeature.isMetabolicEquivalentSupported()
-                    + "</font>;<br/> is Elapsed Time Supported <font color='red'>" + fitnessMachineFeature.isElapsedTimeSupported()
-                    + "</font>;<br/> is Remaining Time Supported <font color='red'>" + fitnessMachineFeature.isRemainingTimeSupported()
-                    + "</font>;<br/> is Power Measurement Supported <font color='red'>" + fitnessMachineFeature.isPowerMeasurementSupported()
-                    + "</font>;<br/> is Force On Belt And Power Output Supported <font color='red'>" + fitnessMachineFeature.isForceOnBeltAndPowerOutputSupported()
-                    + "</font>;<br/> is User Data Retention Supported <font color='red'>" + fitnessMachineFeature.isUserDataRetentionSupported()
-                    + "</font> <br/>Target Setting Features Field: "
-                    + "<br/>         is Speed Target Setting Supported <font color='red'>" + fitnessMachineFeature.isSpeedTargetSettingSupported()
-                    + "</font>;<br/> is Inclination Target Setting Supported <font color='red'>" + fitnessMachineFeature.isInclinationTargetSettingSupported()
-                    + "</font>;<br/> is Resistance Target Setting Supported <font color='red'>" + fitnessMachineFeature.isResistanceTargetSettingSupported()
-                    + "</font>;<br/> is PowerTarget Setting Supported <font color='red'>" + fitnessMachineFeature.isPowerTargetSettingSupported()
-                    + "</font>;<br/> is HeartRate Target Setting Supported <font color='red'>" + fitnessMachineFeature.isHeartRateTargetSettingSupported()
-                    + "</font>;<br/> is Targeted Expended Energy Configuration Supported <font color='red'>" + fitnessMachineFeature.isTargetedExpendedEnergyConfigurationSupported()
-                    + "</font>;<br/> is Targeted Step Number Configuration Supported <font color='red'>" + fitnessMachineFeature.isTargetedStepNumberConfigurationSupported()
-                    + "</font>;<br/> is Targeted Stride Number Configuration Supported <font color='red'>" + fitnessMachineFeature.isTargetedStrideNumberConfigurationSupported()
-                    + "</font>;<br/> is Targeted Distance Configuration Supported <font color='red'>" + fitnessMachineFeature.isTargetedDistanceConfigurationSupported()
-                    + "</font>;<br/> is Targeted Training Time Configuration Supported <font color='red'>" + fitnessMachineFeature.isTargetedTrainingTimeConfigurationSupported()
-                    + "</font>;<br/> is Targeted Time In Two HeartRate Zones Configuration Supported <font color='red'>" + fitnessMachineFeature.isTargetedTimeInTwoHeartRateZonesConfigurationSupported()
-                    + "</font>;<br/> is Targeted Time In Three HeartRate Zones Configuration Supported <font color='red'>" + fitnessMachineFeature.isTargetedTimeInThreeHeartRateZonesConfigurationSupported()
-                    + "</font>;<br/> is Targeted Time In Five HeartRate Zones Configuration Supported <font color='red'>" + fitnessMachineFeature.isTargetedTimeInFiveHeartRateZonesConfigurationSupported()
-                    + "</font>;<br/> is IndoorBike Simulation Parameters Supported <font color='red'>" + fitnessMachineFeature.isIndoorBikeSimulationParametersSupported()
-                    + "</font>;<br/> is Wheel Circumference Configuration Supported <font color='red'>" + fitnessMachineFeature.isWheelCircumferenceConfigurationSupported()
-                    + "</font>;<br/> is Spin Down Control Supported <font color='red'>" + fitnessMachineFeature.isSpinDownControlSupported()
-                    + "</font>;<br/> is Targeted Cadence Configuration Supported <font color='red'>" + fitnessMachineFeature.isTargetedCadenceConfigurationSupported()
-            );
-            sendBroadcast(intent);
-            return;
-        }
-        if (characteristicUUID.equals(UUID.fromString("00002acd-0000-1000-8000-00805F9B34FB"))) {
-            //Treadmill Data
-            Log.i(TAG, "broadcastUpdate: 2acd");
-            TreadmillData treadmillData = TreadmillData.getInstance();
-            treadmillData.parseData(characteristic.getValue());
-            intent.putExtra(EXTRA_DATA, "instant speed is <font color='red'>" + treadmillData.getInstantaneousSpeed()
-                    + "</font> km/h ;<br/> average speed is <font color='red'>" + treadmillData.getAverageSpeed()
-                    + "</font> km/h ;<br/> Ramp_Angle_Setting is <font color='red'>" + treadmillData.getRamp_Angle_Setting()
-                    + "</font> degree ;<br/> total distance is <font color='red'>" + treadmillData.getTotalDistance()
-                    + "</font> m ;<br/> TotalEnergy is <font color='red'>" + treadmillData.getTotalEnergy()
-                    + "</font> Calorie ;<br/> inclination is <font color='red'>" + treadmillData.getinclination()
-                    + "</font> percentage ;<br/> HeartRate is <font color='red'>" + treadmillData.getHeartRate()
-                    + "</font> bpm ;<br/> elapsed time is <font color='red'>" + treadmillData.getElapedTime()
-                    + "</font> second ;<br/> Average_pace is <font color='red'>" + treadmillData.getAverage_pace()
-                    + "</font> kilometre_per_minute ;<br/> InstantaneousPace is <font color='red'>" + treadmillData.getInstantaneousPace()
-                    + "</font> kilometre_per_minute; <br/> Positive_elevation_gain is <font color='red'>" + treadmillData.getPositive_elevation_gain()
-                    + "</font> metre ;<br/> Negative_elevation_gain is <font color='red'>" + treadmillData.getNegative_elevation_gain() + "</font> metre ;<br/>");
-            sendBroadcast(intent);
-            return;
-        }
-        if (characteristicUUID.equals(UUID.fromString("00002ad9-0000-1000-8000-00805F9B34FB"))) {
-            FTMSControlPointResponse instance = FTMSControlPointResponse.getInstance(characteristic.getValue());
-            intent.putExtra(EXTRA_DATA, "ResponseCode_OpCode : " + instance.getResponseCode_OpCode()
-                    + "<br/> RequestOpCode : " + instance.getRequestOpCode()
-                    + "<br/> ResultCode : " + instance.getResultCode()
-            );
-            sendBroadcast(intent);
-            return;
-        }
-        if (characteristicUUID.equals(UUID.fromString("00002ad4-0000-1000-8000-00805F9B34FB"))) {
-            //Supported speed Range | kilometre_per_hour
-            SupportedSpeedRange instance = SupportedSpeedRange.getInstance();
-            instance.parseData(characteristic.getValue());
-            intent.putExtra(EXTRA_DATA, "MinimumSpeed : " + instance.getMinimumSpeed()
-                    + " km/h <br/> MaximumSpeed : " + instance.getMaximumSpeed()
-                    + " km/h <br/> MinimumIncrement : " + instance.getMinimumIncrement() + " km/h <br/> "
-            );
-            sendBroadcast(intent);
-            return;
-        }
-        if (characteristicUUID.equals(UUID.fromString("00002ad5-0000-1000-8000-00805F9B34FB"))) {
-            //Supported Inclination Range | %
-            SupportedInclinationRange instance = SupportedInclinationRange.getInstance();
-            instance.parseData(characteristic.getValue());
-            intent.putExtra(EXTRA_DATA, "MinimumSpeed : " + instance.getMinimumInclination()
-                    + " % <br/> MaximumSpeed : " + instance.getMaximumInclination()
-                    + " % <br/> MinimumIncrement : " + instance.getMinimumIncrement() + " % <br/> "
-            );
-            sendBroadcast(intent);
-            return;
-        }
-        if (characteristicUUID.equals(UUID.fromString("00002ad6-0000-1000-8000-00805F9B34FB"))) {
-            //Supported Resistance Range |
-            SupportedResistanceRange instance = SupportedResistanceRange.getInstance();
-            instance.parseData(characteristic.getValue());
-            intent.putExtra(EXTRA_DATA, "MinimumResistanceLevel : " + instance.getMinimumResistanceLevel()
-                    + " <br/> MaximumResistanceLevel : " + instance.getMaximumResistanceLevel()
-                    + " <br/> MinimumIncrement : " + instance.getMinimumIncrement() + " <br/> "
-            );
-            sendBroadcast(intent);
-            return;
-        }
-        if (characteristicUUID.equals(UUID.fromString("00002ad7-0000-1000-8000-00805F9B34FB"))) {
-            //Supported Heart Rate Range | bpm
-            SupportedHeartRateRange instance = SupportedHeartRateRange.getInstance();
-            instance.parseData(characteristic.getValue());
-            intent.putExtra(EXTRA_DATA, "MinimumHeartRate : " + instance.getMinimumHeartRate()
-                    + " bpm <br/> MaximumHeartRate : " + instance.getMaximumHeartRate()
-                    + " bpm <br/> MinimumIncrement : " + instance.getMinimumIncrement() + " bpm<br/> "
-            );
-            sendBroadcast(intent);
-            return;
-        }
-        if (characteristicUUID.equals(UUID.fromString("00002ad8-0000-1000-8000-00805F9B34FB"))) {
-            //Supported Power Range | watt
-            SupportedPowerRange instance = SupportedPowerRange.getInstance();
-            instance.parseData(characteristic.getValue());
-            intent.putExtra(EXTRA_DATA, "MinimumPower : " + instance.getMinimumPower()
-                    + " watt <br/> MaximumPower : " + instance.getMaximumPower()
-                    + " watt <br/> MinimumIncrement : " + instance.getMinimumIncrement() + " watt<br/> "
-            );
-            sendBroadcast(intent);
-            return;
-        }
-        if (characteristicUUID.equals(UUID.fromString("00002ad1-0000-1000-8000-00805F9B34FB"))) {
-            //Rower Data
-            RowerData instance = RowerData.getInstance();
-            instance.parseData(characteristic.getValue());
-            intent.putExtra(EXTRA_DATA, instance.convert2String());
-            sendBroadcast(intent);
-            return;
-        }
-        if (characteristicUUID.equals(UUID.fromString("00002ace-0000-1000-8000-00805F9B34FB"))) {
-            //Cross Trainer Data
-            CrossTrainerData instance = CrossTrainerData.getInstance();
-            instance.parseData(characteristic.getValue());
-            intent.putExtra(EXTRA_DATA, instance.convert2String());
-            sendBroadcast(intent);
-            return;
-        }
-        if (characteristicUUID.equals(UUID.fromString("00002ad0-0000-1000-8000-00805F9B34FB"))) {
-            //Stair Climber Data
-            StairClimberData instance = StairClimberData.getInstance();
-            instance.parseData(characteristic.getValue());
-            intent.putExtra(EXTRA_DATA, instance.convert2String());
-            sendBroadcast(intent);
-            return;
-        }
-        if (characteristicUUID.equals(UUID.fromString("00002acf-0000-1000-8000-00805F9B34FB"))) {
-            //Step Climber Data
-            StepClimberData instance = StepClimberData.getInstance();
-            instance.parseData(characteristic.getValue());
-            intent.putExtra(EXTRA_DATA, instance.convert2String());
-            sendBroadcast(intent);
-            return;
-        }
-        if (characteristicUUID.equals(UUID.fromString("00002ad3-0000-1000-8000-00805F9B34FB"))) {
-            //TrainingStatus
-            TrainingStatus instance = TrainingStatus.getInstance();
-            instance.parseData(characteristic.getValue());
-            intent.putExtra(EXTRA_DATA, instance.getTrainingStatus());
-            sendBroadcast(intent);
-            return;
-        }
+        if (TX_CHAR_UUID.equals(characteristic.getUuid())) {
+            intent.putExtra(EXTRA_DATA,characteristic.getValue());
+        } else {
 
-        if (characteristicUUID.equals(UUID.fromString("00002ada-0000-1000-8000-00805F9B34FB"))) {
-            //FitnessMachineStatus
-            FitnessMachineStatus instance = FitnessMachineStatus.getInstance();
-            instance.parseData(characteristic.getValue());
-            intent.putExtra(EXTRA_DATA, instance.getCurrentTrainingStatus());
-            sendBroadcast(intent);
-            return;
         }
+//        UUID characteristicUUID = attributeLookup.getCharacteristicUUID(attributeLookup.getCharacteristic(characteristic.getUuid()));
+//        Log.d(TAG,"当前的characteristicUUID"+characteristicUUID);
+//        if (UUID_HEART_RATE_MEASUREMENT.equals(characteristic.getUuid())) {
+//            int flag = characteristic.getProperties();
+//            int format = -1;
+//            if ((flag & 0x01) != 0) {
+//                format = BluetoothGattCharacteristic.FORMAT_UINT16;
+//                Log.d(TAG, "Heart rate format UINT16.");
+//            } else {
+//                format = BluetoothGattCharacteristic.FORMAT_UINT8;
+//                Log.d(TAG, "Heart rate format UINT8.");
+//            }
+//            final int heartRate = characteristic.getIntValue(format, 1);
+//            Log.d(TAG, String.format("Received heart rate: %d", heartRate));
+//            intent.putExtra(EXTRA_DATA, String.valueOf(heartRate));
+//            sendBroadcast(intent);
+//            return;
+//        }
+//        if(UUID.fromString("00002a26-0000-1000-8000-00805F9B34FB").equals(characteristic.getUuid()) || UUID.fromString("00002a27-0000-1000-8000-00805F9B34FB").equals(characteristic.getUuid()) || UUID.fromString("00002a28-0000-1000-8000-00805F9B34FB").equals(characteristic.getUuid())){
+//            Log.i(TAG, "broadcastUpdate: revision");
+//            byte[] value = characteristic.getValue();
+//            intent.putExtra(EXTRA_DATA, new String(value, StandardCharsets.UTF_8));
+//            sendBroadcast(intent);
+//            return;
+//        }
+//        if (characteristicUUID == null) {
+//            intent.putExtra(EXTRA_DATA, "current characteristic can't be parsed data");
+//            sendBroadcast(intent);
+//            return;
+//        }
+//        // so characteristicUUID != null
+//        if (characteristicUUID.equals(UUID.fromString("00002ad2-0000-1000-8000-00805F9B34FB"))) {
+//            //INDOOR_BIKE_DATA
+//            IndoorBikeData indoorBikeData = IndoorBikeData.getInstance();
+//            indoorBikeData.parseData(characteristic.getValue());
+//            intent.putExtra(EXTRA_DATA, "instant speed is <font color='red'>" + indoorBikeData.getInstantaneousSpeed()
+//                    + "</font> km/h ;<br/> average speed is <font color='red'>" + indoorBikeData.getAverageSpeed()
+//                    + "</font> km/h ;<br/> Instantaneous Cadence is <font color='red'>" + indoorBikeData.getInstantaneousCadence()
+//                    + "</font> rpm ;<br/> average cadence is <font color='red'>" + indoorBikeData.getAverageCadence()
+//                    + "</font> rpm ;<br/> Total Energy is <font color='red'>" + indoorBikeData.getTotalEnergy()
+//                    + "</font> Calorie ;<br/> Energy Per Hour is <font color='red'>" + indoorBikeData.getEnergyPerHour()
+//                    + "</font> Calorie ;<br/> Energy Per Minute is <font color='red'>" + indoorBikeData.getEnergyPerMinute()
+//                    + "</font> Calorie ;<br/> Heart Rate is <font color='red'>" + indoorBikeData.getHeartRate()
+//                    + "</font> BPM ;<br/> Metabolic Equivalent is <font color='red'>" + indoorBikeData.getMetabolicEquivalent()
+//                    + "</font> metabolic_equivalent ;<br/> RemainingTime is <font color='red'>" + indoorBikeData.getRemainingTime()
+//                    + "</font> second ;<br/> total distance is <font color='red'>" + indoorBikeData.getTotalDistance()
+//                    + "</font> metre ;<br/> resistance level is <font color='red'>" + indoorBikeData.getResistanceLevel()
+//                    + "</font>;<br/> instant power is <font color='red'>" + indoorBikeData.getInstantaneousPower()
+//                    + "</font> watt ;<br/> average power is <font color='red'>" + indoorBikeData.getAveragePower()
+//                    + "</font> watt ;<br/> elapsed time is <font color='red'>" + indoorBikeData.getElapedTime() + "</font> second ;<br/>");
+//            sendBroadcast(intent);
+//            return;
+//        }
+//        if (characteristicUUID.equals(UUID.fromString("00002acc-0000-1000-8000-00805F9B34FB"))) {
+//            //Fitness Machine feature
+//            Log.i(TAG, "broadcastUpdate: 2acc");
+//            FitnessMachineFeature fitnessMachineFeature = FitnessMachineFeature.getInstance();
+//            fitnessMachineFeature.parseData(characteristic.getValue());
+//            intent.putExtra("FitnessMachineFeature","flag");
+//            intent.putExtra(EXTRA_DATA, "Fitness Machine Features Field : "
+//                    + "<br/>         is Average Speed Supported <font color='red'>" + fitnessMachineFeature.isAverageSpeedSupported()
+//                    + "</font>;<br/> is Cadence Supported <font color='red'>" + fitnessMachineFeature.isCadenceSupported()
+//                    + "</font>;<br/> is Total Distance Supported <font color='red'>" + fitnessMachineFeature.isTotalDistanceSupported()
+//                    + "</font>;<br/> is Inclination Supported <font color='red'>" + fitnessMachineFeature.isInclinationSupported()
+//                    + "</font>;<br/> is Elevation Gain Supported <font color='red'>" + fitnessMachineFeature.isElevationGainSupported()
+//                    + "</font>;<br/> is Pace Supported <font color='red'>" + fitnessMachineFeature.isPaceSupported()
+//                    + "</font>;<br/> is Step Count Supported <font color='red'>" + fitnessMachineFeature.isStepCountSupported()
+//                    + "</font>;<br/> is Resistance Level Supported <font color='red'>" + fitnessMachineFeature.isResistanceLevelSupported()
+//                    + "</font>;<br/> is Stride Count Supported <font color='red'>" + fitnessMachineFeature.isStrideCountSupported()
+//                    + "</font>;<br/> is Expended Energy Supported <font color='red'>" + fitnessMachineFeature.isExpendedEnergySupported()
+//                    + "</font>;<br/> is HeartRate Measurement Supported <font color='red'>" + fitnessMachineFeature.isHeartRateMeasurementSupported()
+//                    + "</font>;<br/> is Metabolic Equivalent Supported <font color='red'>" + fitnessMachineFeature.isMetabolicEquivalentSupported()
+//                    + "</font>;<br/> is Elapsed Time Supported <font color='red'>" + fitnessMachineFeature.isElapsedTimeSupported()
+//                    + "</font>;<br/> is Remaining Time Supported <font color='red'>" + fitnessMachineFeature.isRemainingTimeSupported()
+//                    + "</font>;<br/> is Power Measurement Supported <font color='red'>" + fitnessMachineFeature.isPowerMeasurementSupported()
+//                    + "</font>;<br/> is Force On Belt And Power Output Supported <font color='red'>" + fitnessMachineFeature.isForceOnBeltAndPowerOutputSupported()
+//                    + "</font>;<br/> is User Data Retention Supported <font color='red'>" + fitnessMachineFeature.isUserDataRetentionSupported()
+//                    + "</font> <br/>Target Setting Features Field: "
+//                    + "<br/>         is Speed Target Setting Supported <font color='red'>" + fitnessMachineFeature.isSpeedTargetSettingSupported()
+//                    + "</font>;<br/> is Inclination Target Setting Supported <font color='red'>" + fitnessMachineFeature.isInclinationTargetSettingSupported()
+//                    + "</font>;<br/> is Resistance Target Setting Supported <font color='red'>" + fitnessMachineFeature.isResistanceTargetSettingSupported()
+//                    + "</font>;<br/> is PowerTarget Setting Supported <font color='red'>" + fitnessMachineFeature.isPowerTargetSettingSupported()
+//                    + "</font>;<br/> is HeartRate Target Setting Supported <font color='red'>" + fitnessMachineFeature.isHeartRateTargetSettingSupported()
+//                    + "</font>;<br/> is Targeted Expended Energy Configuration Supported <font color='red'>" + fitnessMachineFeature.isTargetedExpendedEnergyConfigurationSupported()
+//                    + "</font>;<br/> is Targeted Step Number Configuration Supported <font color='red'>" + fitnessMachineFeature.isTargetedStepNumberConfigurationSupported()
+//                    + "</font>;<br/> is Targeted Stride Number Configuration Supported <font color='red'>" + fitnessMachineFeature.isTargetedStrideNumberConfigurationSupported()
+//                    + "</font>;<br/> is Targeted Distance Configuration Supported <font color='red'>" + fitnessMachineFeature.isTargetedDistanceConfigurationSupported()
+//                    + "</font>;<br/> is Targeted Training Time Configuration Supported <font color='red'>" + fitnessMachineFeature.isTargetedTrainingTimeConfigurationSupported()
+//                    + "</font>;<br/> is Targeted Time In Two HeartRate Zones Configuration Supported <font color='red'>" + fitnessMachineFeature.isTargetedTimeInTwoHeartRateZonesConfigurationSupported()
+//                    + "</font>;<br/> is Targeted Time In Three HeartRate Zones Configuration Supported <font color='red'>" + fitnessMachineFeature.isTargetedTimeInThreeHeartRateZonesConfigurationSupported()
+//                    + "</font>;<br/> is Targeted Time In Five HeartRate Zones Configuration Supported <font color='red'>" + fitnessMachineFeature.isTargetedTimeInFiveHeartRateZonesConfigurationSupported()
+//                    + "</font>;<br/> is IndoorBike Simulation Parameters Supported <font color='red'>" + fitnessMachineFeature.isIndoorBikeSimulationParametersSupported()
+//                    + "</font>;<br/> is Wheel Circumference Configuration Supported <font color='red'>" + fitnessMachineFeature.isWheelCircumferenceConfigurationSupported()
+//                    + "</font>;<br/> is Spin Down Control Supported <font color='red'>" + fitnessMachineFeature.isSpinDownControlSupported()
+//                    + "</font>;<br/> is Targeted Cadence Configuration Supported <font color='red'>" + fitnessMachineFeature.isTargetedCadenceConfigurationSupported()
+//            );
+//            sendBroadcast(intent);
+//            return;
+//        }
+//        if (characteristicUUID.equals(UUID.fromString("00002acd-0000-1000-8000-00805F9B34FB"))) {
+//            //Treadmill Data
+//            Log.i(TAG, "broadcastUpdate: 2acd");
+//            TreadmillData treadmillData = TreadmillData.getInstance();
+//            treadmillData.parseData(characteristic.getValue());
+//            intent.putExtra(EXTRA_DATA, "instant speed is <font color='red'>" + treadmillData.getInstantaneousSpeed()
+//                    + "</font> km/h ;<br/> average speed is <font color='red'>" + treadmillData.getAverageSpeed()
+//                    + "</font> km/h ;<br/> Ramp_Angle_Setting is <font color='red'>" + treadmillData.getRamp_Angle_Setting()
+//                    + "</font> degree ;<br/> total distance is <font color='red'>" + treadmillData.getTotalDistance()
+//                    + "</font> m ;<br/> TotalEnergy is <font color='red'>" + treadmillData.getTotalEnergy()
+//                    + "</font> Calorie ;<br/> inclination is <font color='red'>" + treadmillData.getinclination()
+//                    + "</font> percentage ;<br/> HeartRate is <font color='red'>" + treadmillData.getHeartRate()
+//                    + "</font> bpm ;<br/> elapsed time is <font color='red'>" + treadmillData.getElapedTime()
+//                    + "</font> second ;<br/> Average_pace is <font color='red'>" + treadmillData.getAverage_pace()
+//                    + "</font> kilometre_per_minute ;<br/> InstantaneousPace is <font color='red'>" + treadmillData.getInstantaneousPace()
+//                    + "</font> kilometre_per_minute; <br/> Positive_elevation_gain is <font color='red'>" + treadmillData.getPositive_elevation_gain()
+//                    + "</font> metre ;<br/> Negative_elevation_gain is <font color='red'>" + treadmillData.getNegative_elevation_gain() + "</font> metre ;<br/>");
+//            sendBroadcast(intent);
+//            return;
+//        }
+//        if (characteristicUUID.equals(UUID.fromString("00002ad9-0000-1000-8000-00805F9B34FB"))) {
+//            FTMSControlPointResponse instance = FTMSControlPointResponse.getInstance(characteristic.getValue());
+//            intent.putExtra(EXTRA_DATA, "ResponseCode_OpCode : " + instance.getResponseCode_OpCode()
+//                    + "<br/> RequestOpCode : " + instance.getRequestOpCode()
+//                    + "<br/> ResultCode : " + instance.getResultCode()
+//            );
+//            sendBroadcast(intent);
+//            return;
+//        }
+//        if (characteristicUUID.equals(UUID.fromString("00002ad4-0000-1000-8000-00805F9B34FB"))) {
+//            //Supported speed Range | kilometre_per_hour
+//            SupportedSpeedRange instance = SupportedSpeedRange.getInstance();
+//            instance.parseData(characteristic.getValue());
+//            intent.putExtra(EXTRA_DATA, "MinimumSpeed : " + instance.getMinimumSpeed()
+//                    + " km/h <br/> MaximumSpeed : " + instance.getMaximumSpeed()
+//                    + " km/h <br/> MinimumIncrement : " + instance.getMinimumIncrement() + " km/h <br/> "
+//            );
+//            sendBroadcast(intent);
+//            return;
+//        }
+//        if (characteristicUUID.equals(UUID.fromString("00002ad5-0000-1000-8000-00805F9B34FB"))) {
+//            //Supported Inclination Range | %
+//            SupportedInclinationRange instance = SupportedInclinationRange.getInstance();
+//            instance.parseData(characteristic.getValue());
+//            intent.putExtra(EXTRA_DATA, "MinimumSpeed : " + instance.getMinimumInclination()
+//                    + " % <br/> MaximumSpeed : " + instance.getMaximumInclination()
+//                    + " % <br/> MinimumIncrement : " + instance.getMinimumIncrement() + " % <br/> "
+//            );
+//            sendBroadcast(intent);
+//            return;
+//        }
+//        if (characteristicUUID.equals(UUID.fromString("00002ad6-0000-1000-8000-00805F9B34FB"))) {
+//            //Supported Resistance Range |
+//            SupportedResistanceRange instance = SupportedResistanceRange.getInstance();
+//            instance.parseData(characteristic.getValue());
+//            intent.putExtra(EXTRA_DATA, "MinimumResistanceLevel : " + instance.getMinimumResistanceLevel()
+//                    + " <br/> MaximumResistanceLevel : " + instance.getMaximumResistanceLevel()
+//                    + " <br/> MinimumIncrement : " + instance.getMinimumIncrement() + " <br/> "
+//            );
+//            sendBroadcast(intent);
+//            return;
+//        }
+//        if (characteristicUUID.equals(UUID.fromString("00002ad7-0000-1000-8000-00805F9B34FB"))) {
+//            //Supported Heart Rate Range | bpm
+//            SupportedHeartRateRange instance = SupportedHeartRateRange.getInstance();
+//            instance.parseData(characteristic.getValue());
+//            intent.putExtra(EXTRA_DATA, "MinimumHeartRate : " + instance.getMinimumHeartRate()
+//                    + " bpm <br/> MaximumHeartRate : " + instance.getMaximumHeartRate()
+//                    + " bpm <br/> MinimumIncrement : " + instance.getMinimumIncrement() + " bpm<br/> "
+//            );
+//            sendBroadcast(intent);
+//            return;
+//        }
+//        if (characteristicUUID.equals(UUID.fromString("00002ad8-0000-1000-8000-00805F9B34FB"))) {
+//            //Supported Power Range | watt
+//            SupportedPowerRange instance = SupportedPowerRange.getInstance();
+//            instance.parseData(characteristic.getValue());
+//            intent.putExtra(EXTRA_DATA, "MinimumPower : " + instance.getMinimumPower()
+//                    + " watt <br/> MaximumPower : " + instance.getMaximumPower()
+//                    + " watt <br/> MinimumIncrement : " + instance.getMinimumIncrement() + " watt<br/> "
+//            );
+//            sendBroadcast(intent);
+//            return;
+//        }
+//        if (characteristicUUID.equals(UUID.fromString("00002ad1-0000-1000-8000-00805F9B34FB"))) {
+//            //Rower Data
+//            RowerData instance = RowerData.getInstance();
+//            instance.parseData(characteristic.getValue());
+//            intent.putExtra(EXTRA_DATA, instance.convert2String());
+//            sendBroadcast(intent);
+//            return;
+//        }
+//        if (characteristicUUID.equals(UUID.fromString("00002ace-0000-1000-8000-00805F9B34FB"))) {
+//            //Cross Trainer Data
+//            CrossTrainerData instance = CrossTrainerData.getInstance();
+//            instance.parseData(characteristic.getValue());
+//            intent.putExtra(EXTRA_DATA, instance.convert2String());
+//            sendBroadcast(intent);
+//            return;
+//        }
+//        if (characteristicUUID.equals(UUID.fromString("00002ad0-0000-1000-8000-00805F9B34FB"))) {
+//            //Stair Climber Data
+//            StairClimberData instance = StairClimberData.getInstance();
+//            instance.parseData(characteristic.getValue());
+//            intent.putExtra(EXTRA_DATA, instance.convert2String());
+//            sendBroadcast(intent);
+//            return;
+//        }
+//        if (characteristicUUID.equals(UUID.fromString("00002acf-0000-1000-8000-00805F9B34FB"))) {
+//            //Step Climber Data
+//            StepClimberData instance = StepClimberData.getInstance();
+//            instance.parseData(characteristic.getValue());
+//            intent.putExtra(EXTRA_DATA, instance.convert2String());
+//            sendBroadcast(intent);
+//            return;
+//        }
+//        if (characteristicUUID.equals(UUID.fromString("00002ad3-0000-1000-8000-00805F9B34FB"))) {
+//            //TrainingStatus
+//            TrainingStatus instance = TrainingStatus.getInstance();
+//            instance.parseData(characteristic.getValue());
+//            intent.putExtra(EXTRA_DATA, instance.getTrainingStatus());
+//            sendBroadcast(intent);
+//            return;
+//        }
+//
+//        if (characteristicUUID.equals(UUID.fromString("00002ada-0000-1000-8000-00805F9B34FB"))) {
+//            //FitnessMachineStatus
+//            FitnessMachineStatus instance = FitnessMachineStatus.getInstance();
+//            instance.parseData(characteristic.getValue());
+//            intent.putExtra(EXTRA_DATA, instance.getCurrentTrainingStatus());
+//            sendBroadcast(intent);
+//            return;
+//        }
         // For all other profiles, writes the data formatted in HEX.
-        final byte[] data = characteristic.getValue();
-        if (data != null && data.length > 0) {
-            final StringBuilder stringBuilder = new StringBuilder(data.length);
-            for (byte byteChar : data)
-                stringBuilder.append(String.format("%02X ", byteChar));
-            Log.i(TAG, "broadcastUpdate: ==> " + new String(data));
-            intent.putExtra(EXTRA_DATA, new String(data) + stringBuilder.toString());
-        }
+//        final byte[] data = characteristic.getValue();
+//        if (data != null && data.length > 0) {
+//            final StringBuilder stringBuilder = new StringBuilder(data.length);
+//            for (byte byteChar : data)
+//                stringBuilder.append(String.format("%02X ", byteChar));
+//            Log.i(TAG, "broadcastUpdate: ==> " + new String(data));
+//            intent.putExtra(EXTRA_DATA, new String(data) + stringBuilder.toString());
+//        }
         sendBroadcast(intent);
 
     }
@@ -560,6 +576,42 @@ public class BLEService extends Service {
             mCurrentBluetoothGatt.setCharacteristicNotification(currentNotifyCharacteristicFromStrUUID, false);
             currentNotifyCharacteristicFromStrUUID = null;
         }
+    }
+
+    /**
+     * Enable TXNotification
+     *
+     * @return
+     */
+    public void enableTXNotification()
+    {
+        /*
+        if (mBluetoothGatt == null) {
+        	showMessage("mBluetoothGatt null" + mBluetoothGatt);
+        	broadcastUpdate(DEVICE_DOES_NOT_SUPPORT_UART);
+        	return;
+        }
+        	*/
+        BluetoothGattService RxService = mCurrentBluetoothGatt.getService (RX_SERVICE_UUID);
+        if (RxService == null)
+        {
+            showMessage ("Rx service not found!");
+            broadcastUpdate (DEVICE_DOES_NOT_SUPPORT_UART);
+            return;
+        }
+        BluetoothGattCharacteristic TxChar = RxService.getCharacteristic (TX_CHAR_UUID);
+        if (TxChar == null)
+        {
+            showMessage ("Tx charateristic not found!");
+            broadcastUpdate (DEVICE_DOES_NOT_SUPPORT_UART);
+            return;
+        }
+        mCurrentBluetoothGatt.setCharacteristicNotification (TxChar, true);
+
+        BluetoothGattDescriptor descriptor = TxChar.getDescriptor (CCCD);
+        descriptor.setValue (BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+        mCurrentBluetoothGatt.writeDescriptor (descriptor);
+
     }
 
     public void writeCharacteristic(String characteristic_uuid, String strOperation, String strParameter) {

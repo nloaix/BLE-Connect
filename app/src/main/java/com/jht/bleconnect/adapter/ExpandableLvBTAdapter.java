@@ -164,6 +164,7 @@ public class ExpandableLvBTAdapter extends BaseExpandableListAdapter {
 
         Log.d(TAG,"propertiesStr==="+propertiesStr);
         if (propertiesStr.contains("READ")) {
+            Log.d(TAG,"propertiesStr.contains(\"READ\")");
             childViewHolder.mBtnReadData.setVisibility(View.VISIBLE);
             childViewHolder.mBtnReadData.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -177,7 +178,9 @@ public class ExpandableLvBTAdapter extends BaseExpandableListAdapter {
                 }
             });
         }
+        // contains 判断左侧对象是否包含右侧对象
         if (propertiesStr.contains("NOTIFY")) {
+            Log.d(TAG,"propertiesStr======"+propertiesStr);
             int visibility = childViewHolder.mBtnReadData.getVisibility();
             childViewHolder.mBtnNotify.setVisibility(View.VISIBLE);
             childViewHolder.mBtnNotify.setOnClickListener(new View.OnClickListener() {

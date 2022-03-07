@@ -1,5 +1,7 @@
 package com.jht.bleconnect.ui;
 
+import static com.jht.bleconnect.common.CmdUtil.bytes2HexString;
+
 import androidx.annotation.LongDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -31,6 +33,7 @@ import android.os.Message;
 import android.os.Parcelable;
 import android.provider.Settings;
 import android.text.Html;
+import android.text.LoginFilter;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -64,7 +67,6 @@ public class BleDevicesActivity extends AppCompatActivity {
     private Button mScan;
     private ListView mLvBtDevices;
     private Button begin;   // 开始按钮
-    private boolean mConnected;
     private String deviceName;
     private boolean mDisconnect = true;
     private Timer timer;
@@ -124,6 +126,7 @@ public class BleDevicesActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG,"Activity is Created");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ble_devices);
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
@@ -206,11 +209,13 @@ public class BleDevicesActivity extends AppCompatActivity {
                 if (hasPermission && isBTOpen && isGPSOpen) {
                     Log.i(TAG, "onClick: start scan!");
                     if (!mScanning) {
+                        btDeviceLVAdapter.setSelectedId(-1);
                         btDeviceLVAdapter.clearDevicesList();
                         bluetoothAdapter.startLeScan(leScanCallback);
                         mScanning = true;
                         uiHandler.postDelayed(stopScan, SCAN_PERIOD);
                         mScan.setText("Scanning");
+
                     } else {
                         Toast.makeText(App.getAppContext(), "bt is scanning!", Toast.LENGTH_SHORT).show();
                     }
@@ -228,10 +233,11 @@ public class BleDevicesActivity extends AppCompatActivity {
         mLvBtDevices.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                btDeviceLVAdapter.setSelectedId(position);
                 mScanning = false;
                 mScan.setText("SCAN");
                 uiHandler.removeCallbacks(stopScan);
-                bluetoothAdapter.stopLeScan(leScanCallback);
+                bluetoothAdapter.stopLeScan(leScanCallback) ;
                 BluetoothDevice device = (BluetoothDevice) btDeviceLVAdapter.getItem(position);
                 Log.d(TAG,"原来点击后的device==="+device);
                 Intent intent = new Intent(BleDevicesActivity.this, BleControlActivity.class);
@@ -245,82 +251,86 @@ public class BleDevicesActivity extends AppCompatActivity {
         });
 
 
-        final TimerTask task = new TimerTask() {
-            @Override
-            public void run() {
-                Message message = new Message();
-                message.what = 1;
-                handler.sendMessage(message);
-            }
-        };
+//        final TimerTask task = new TimerTask() {
+//            @Override
+//            public void run() {
+//                Message message = new Message();
+//                message.what = 1;
+//                handler.sendMessage(message);
+//            }
+//        };
 
         // 循环btDeviceLVAdapter中的LIST
-        begin = (Button) findViewById(R.id.begin);
-        begin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                timer = new Timer();
-                timer.schedule(task,0,3000);
-                Log.d(TAG,"mLvBtDevices的长度是="+mLvBtDevices.getCount());
-            }
-        });
+//        begin = (Button) findViewById(R.id.begin);
+//        begin.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                timer = new Timer();
+////                timer.schedule(task,0,3000);
+//                Log.d(TAG,"mLvBtDevices的长度是="+btDeviceLVAdapter.getCount());
+//            }
+//        });
     }
 
 
-    private Handler handler = new Handler() {
-        public void handleMessage (Message msg) {
-            Log.d(TAG,"此时的i=="+i);
-            BluetoothDevice device = (BluetoothDevice) btDeviceLVAdapter.getItem(i);
-            Log.d(TAG,"此时的device===="+device);
-            Intent intent = new Intent(getApplicationContext(),BLEService.class);
-            intent.putExtra("device",device);
-            bindService(intent,serviceConnection,BIND_AUTO_CREATE);
-            registerReceiver(mGattServiceContent,getFilters());
-            i += 1;
-            if (i == btDeviceLVAdapter.getCount()) {
-                timer.cancel();
-                Log.d(TAG,"定时器已取消");
-            }
-            super.handleMessage(msg);
-        }
-    };
+//    private Handler handler = new Handler() {
+//        public void handleMessage (Message msg) {
+//            Log.d(TAG,"此时的i=="+i);
+//            BluetoothDevice device = (BluetoothDevice) btDeviceLVAdapter.getItem(i);
+//            Log.d(TAG,"此时的device===="+device);
+//            Intent intent = new Intent(getApplicationContext(),BLEService.class);
+//            intent.putExtra("device",device);
+//            bindService(intent,serviceConnection,BIND_AUTO_CREATE);
+//            registerReceiver(mGattServiceContent,getFilters());
+//            i += 1;
+//            if (i == btDeviceLVAdapter.getCount()) {
+//                timer.cancel();
+//                Log.d(TAG,"定时器已取消");
+//            }
+//            super.handleMessage(msg);
+//        }
+//    };
 
-    // GATT service connect
-    private ServiceConnection serviceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            bleService = ((BLEService.BleBinder) service).getBleService();
-            Log.d(TAG,"onServiceConnected");
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            Log.d(TAG,"onServiceDisConnected");
-            bleService = null;
-        }
-    };
-
-    private final BroadcastReceiver mGattServiceContent = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            Log.d(TAG,"action==" + action);
-            if (BLEService.ACTION_GATT_CONNECTED.equals(action)) {
-                Log.d(TAG,"ACTION_GATT_CONNECTED");
-            } else if (BLEService.ACTION_GATT_DISCONNECTED.equals(action)) {
-                Log.d(TAG,"ACTION_GATT_DISCONNECTED");
-            } else if (BLEService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
-                Log.d(TAG,"ACTION_GATT_SERVICES_DISCOVERED");
-                byte[] value = {
-                        (byte) 0xFE, 0x13, 0x01, 0x03, 0x15
-                };
-                bleService.writeRXCharacteristic(value);
-                unbindService(serviceConnection);
-            } else if (BLEService.ACTION_DATA_AVAILABLE.equals(action)) {
-                Log.d(TAG,"ACTION_DATA_AVAILABLE");
-            }
-        }
-    };
+//    // GATT service connect
+//    private ServiceConnection serviceConnection = new ServiceConnection() {
+//        @Override
+//        public void onServiceConnected(ComponentName name, IBinder service) {
+//            bleService = ((BLEService.BleBinder) service).getBleService();
+//            Log.d(TAG,"onServiceConnected");
+//        }
+//
+//        @Override
+//        public void onServiceDisconnected(ComponentName name) {
+//            Log.d(TAG,"onServiceDisConnected");
+//            bleService = null;
+//        }
+//    };
+//
+//    private final BroadcastReceiver mGattServiceContent = new BroadcastReceiver() {
+//        @Override
+//        public void onReceive(Context context, Intent intent) {
+//            String action = intent.getAction();
+//            Log.d(TAG,"action==" + action);
+//            if (BLEService.ACTION_GATT_CONNECTED.equals(action)) {
+//                Log.d(TAG,"ACTION_GATT_CONNECTED");
+//            } else if (BLEService.ACTION_GATT_DISCONNECTED.equals(action)) {
+//                Log.d(TAG,"ACTION_GATT_DISCONNECTED");
+//            } else if (BLEService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
+//                Log.d(TAG,"ACTION_GATT_SERVICES_DISCOVERED");
+//                byte[] value = {
+//                        (byte) 0xFE, 0x13, 0x01, 0x03, 0x15
+//                };
+//                bleService.writeRXCharacteristic(value);
+//                unbindService(serviceConnection);
+////                bleService.enableTXNotification();
+//            } else if (BLEService.ACTION_DATA_AVAILABLE.equals(action)) {
+//                Log.d(TAG,"现在是action====ACTION_DATA_AVAILABLE");
+//                final byte[] rxValue = intent.getByteArrayExtra (BLEService.EXTRA_DATA);
+//                Log.d(TAG,"此处的rxvalue=========" + bytes2HexString(rxValue));
+////                mLvBtDevices.setSelector(R.color.colorlvBtn);
+//            }
+//        }
+//    };
 
     @Override
     protected void onDestroy() {
@@ -346,10 +356,13 @@ public class BleDevicesActivity extends AppCompatActivity {
                 break;
             case REQUEST_ENABLE_GPS:
                 openGPS();
-                break;
+            break;
         }
     }
 
+
+
+    // 权限返回值
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         switch (requestCode) {
@@ -417,11 +430,11 @@ public class BleDevicesActivity extends AppCompatActivity {
                     mScanning = true;
                     uiHandler.postDelayed(stopScan, SCAN_PERIOD);
                     mScan.setText("Scanning");
-
                 } else {
                     hasPermission = AppPermission.requestAppPermissions(BleDevicesActivity.this, REQUEST_PERMISSIONS);
                     if (hasPermission) {
                         Toast.makeText(App.getAppContext(), "Please open BT and GPS", Toast.LENGTH_SHORT).show();
+
                     }
                 }
             }
