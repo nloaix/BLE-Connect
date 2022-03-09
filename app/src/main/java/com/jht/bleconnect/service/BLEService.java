@@ -95,7 +95,6 @@ public class BLEService extends Service {
 
 
     public boolean writeRXCharacteristic (byte[] value) {
-        Log.d(TAG,"WRITE START");
         BluetoothGattService RxService = mCurrentBluetoothGatt.getService (RX_SERVICE_UUID);
         showMessage ("mBluetoothGatt null" + mCurrentGattServices);
         if (RxService == null)
@@ -113,8 +112,6 @@ public class BLEService extends Service {
         }
         RxChar.setValue (value);
         boolean status = mCurrentBluetoothGatt.writeCharacteristic (RxChar);
-        Log.d(TAG,"STATUS"+status);
-        Log.d(TAG,"WRITE END");
         return status;
     }
 
@@ -223,7 +220,7 @@ public class BLEService extends Service {
                                          BluetoothGattCharacteristic characteristic,
                                          int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                Log.i(TAG, "onCharacteristicRead: 1111");
+                Log.i(TAG, "onCharacteristicRead: Line 226");
                 broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
             }
         }

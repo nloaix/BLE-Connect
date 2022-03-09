@@ -22,5 +22,6 @@
     <string name="begin">开始</string>
     <string name="tv_rssi">RSSI值</string>
     <string name="tv_rssi_data">-50dBm</string>
+    <string name="connect_result">连接结果：null</string>
 
 </resources>

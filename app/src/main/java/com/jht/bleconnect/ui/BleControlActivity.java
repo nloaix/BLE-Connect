@@ -63,8 +63,7 @@ public class BleControlActivity extends AppCompatActivity {
     private BTDeviceLVAdapter btDeviceLVAdapter;
 
     private boolean isWrite;
-    private boolean isReport;
-    private boolean isPass;
+    private TextView connect_result;
 
 
     // 16进制转换
@@ -113,18 +112,26 @@ public class BleControlActivity extends AppCompatActivity {
 //                        吮吸器震动3挡
                         (byte) 0xFE,0x11,0x01,0x23,0x33
                 };
-                bleService.writeRXCharacteristic(value);
+                isWrite = bleService.writeRXCharacteristic(value);
                 bleService.enableTXNotification();
             } else if (BLEService.ACTION_DATA_AVAILABLE.equals(action)) {
                 if("flag".equals(intent.getStringExtra("FitnessMachineFeature"))){
                     Log.d(TAG,"is ACTION_DATA_AVAILABLE");
-//                    displayFitnessMachineFeatureData(Html.fromHtml(intent.getStringExtra(BLervice.EXTRA_DATA)));
+//                    displayFitnessMachineFeatureData(Html.fromHtml(intent.getStringExtra(BLEService.EXTRA_DATA)));
                 }else {
                     final byte[] rxValue = intent.getByteArrayExtra (BLEService.EXTRA_DATA);
                     Log.d(TAG,"此处的rxvalue======" + bytes2HexString(rxValue));
-                    isReport = true;
 //                    displayData(Html.fromHtml(intent.getStringExtra(BLEService.EXTRA_DATA)));
+                    if (isWrite) {
+                        connect_result.setText("连接结果：成功");
+                        connect_result.setTextColor(0xff00bc12);
+                    } else {
+                        connect_result.setText("连接结果：失败");
+                        connect_result.setTextColor(0xfff80000);
+
+                    }
                 }
+
             }
         }
     };
@@ -179,6 +186,7 @@ public class BleControlActivity extends AppCompatActivity {
         Intent bleServiceIntent = new Intent(this, BLEService.class);
         bleServiceIntent.putExtra("device",device);
         bindService(bleServiceIntent,serviceConnection,BIND_AUTO_CREATE);
+        connect_result = (TextView) findViewById(R.id.connect_result);
     }
 
     private void initViews() {
@@ -311,7 +319,6 @@ public class BleControlActivity extends AppCompatActivity {
             }
         });
         alertDialog = new AlertDialog.Builder(this).setView(inflate).show();
-
     }
 
     private void setCharacteristicNotify(String characteristic_uuid) {

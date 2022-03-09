@@ -8,8 +8,8 @@ android {
         applicationId "com.jht.bleconnect"
         minSdkVersion 26
         targetSdkVersion 29
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "1.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -18,6 +18,17 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    // 自定义apk文件名
+    android{
+        //修改生成的文件名
+        applicationVariants.all { variant ->
+            variant.outputs.all {
+                def fileName =  "BLEConnect.apk"
+                outputFileName = fileName
+            }
         }
     }
 }

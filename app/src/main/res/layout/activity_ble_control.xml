@@ -22,23 +22,23 @@
             android:id="@+id/tv_device_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="18sp"
             android:gravity="center_vertical"
-            android:textStyle="bold"
+            android:text="Device Name: "
             android:textColor="@color/black"
-            android:text="Device Name: " />
+            android:textSize="18sp"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/tv_device_mac"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toEndOf="@id/tv_device_name"
             android:layout_above="@id/tv_device_data"
             android:layout_alignParentTop="true"
+            android:layout_toEndOf="@id/tv_device_name"
             android:gravity="center_vertical"
-            android:textColor="#000"
             android:paddingLeft="10dp"
-            android:text="123:213:23:23" />
+            android:text="123:213:23:23"
+            android:textColor="#000" />
 
         <TextView
             android:id="@+id/tv_data_name"
@@ -47,23 +47,35 @@
             android:layout_below="@id/tv_device_name"
             android:layout_marginTop="10dp"
             android:gravity="center_vertical"
+            android:text="Data: "
             android:textColor="@color/black"
             android:textSize="18sp"
-            android:textStyle="bold"
-            android:text="Data: " />
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/tv_device_data"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/tv_device_name"
+            android:layout_marginTop="10dp"
             android:layout_toEndOf="@id/tv_data_name"
             android:gravity="center_vertical"
-            android:textSize="16sp"
-            android:paddingTop="4dp"
             android:paddingLeft="10dp"
-            android:layout_marginTop="10dp"
-            android:text="123:213:23:23wewe" />
+            android:paddingTop="4dp"
+            android:text="123:213:23:23wewe"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/connect_result"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_data_name"
+            android:layout_marginTop="12dp"
+            android:text="连接结果：NULL"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            />
 
     </RelativeLayout>
 
